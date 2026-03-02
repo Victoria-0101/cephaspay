@@ -1,63 +1,54 @@
+import { MapPin, Phone, Mail } from "lucide-react";
+
 const Footer = () => {
   return (
-    <footer className="border-t border-border bg-secondary/50">
-      <div className="container mx-auto px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="border-t border-border bg-foreground text-background pb-16 md:pb-0">
+      <div className="container mx-auto px-4 py-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {/* Brand */}
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-3">Cephaspay</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Premium phones, gadgets & electronics. Curated for those who demand the best.
+          <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-1.5 mb-3">
+              <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-extrabold text-xs">C</span>
+              </div>
+              <span className="text-base font-bold">Cephaspay</span>
+            </div>
+            <p className="text-xs text-background/60 leading-relaxed mb-3">
+              Your trusted marketplace for phones, gadgets & electronics.
             </p>
+            <div className="space-y-1 text-xs text-background/50">
+              <p className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Lagos, Nigeria</p>
+              <p className="flex items-center gap-1"><Phone className="h-3 w-3" /> +234 800 000 0000</p>
+              <p className="flex items-center gap-1"><Mail className="h-3 w-3" /> help@cephaspay.com</p>
+            </div>
           </div>
 
-          {/* Shop */}
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Shop</h4>
-            <ul className="space-y-2">
-              {["Phones", "Accessories", "Electronics", "New Arrivals"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground luxury-transition">
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Support</h4>
-            <ul className="space-y-2">
-              {["Contact Us", "FAQs", "Shipping", "Returns"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground luxury-transition">
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Legal</h4>
-            <ul className="space-y-2">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground luxury-transition">
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {[
+            { title: "Shop", links: ["All Products", "Phones", "Accessories", "Electronics", "Deals"] },
+            { title: "Account", links: ["Sign In", "Your Orders", "Wish List", "Track Order", "Returns"] },
+            { title: "Support", links: ["Help Center", "Contact Us", "Shipping Info", "FAQs", "Live Chat"] },
+            { title: "Company", links: ["About Us", "Careers", "Press", "Privacy", "Terms"] },
+          ].map((section) => (
+            <div key={section.title}>
+              <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-background/80">{section.title}</h4>
+              <ul className="space-y-1.5">
+                {section.links.map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-xs text-background/50 hover:text-background luxury-transition">{link}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border text-center">
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Cephaspay. All rights reserved.
-          </p>
+        <div className="mt-8 pt-6 border-t border-background/10 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-[10px] text-background/40">© {new Date().getFullYear()} Cephaspay. All rights reserved.</p>
+          <div className="flex gap-4 text-[10px] text-background/40">
+            <a href="#" className="hover:text-background luxury-transition">Privacy</a>
+            <a href="#" className="hover:text-background luxury-transition">Terms</a>
+            <a href="#" className="hover:text-background luxury-transition">Cookies</a>
+          </div>
         </div>
       </div>
     </footer>
