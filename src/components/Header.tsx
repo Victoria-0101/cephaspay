@@ -1,4 +1,5 @@
 import { Search, ShoppingCart, User, MapPin, ChevronDown, Menu, X, Clock } from "lucide-react";
+import logo from "@/assets/logo.jpg";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -80,9 +81,7 @@ const Header = () => {
 
           {/* Logo */}
           <a href="/" className="shrink-0 flex items-center gap-1.5">
-            <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-extrabold text-sm">C</span>
-            </div>
+            <img src={logo} alt="CephasTech" className="h-8 w-auto object-contain" />
             <span className="text-lg font-bold tracking-tight text-foreground hidden sm:inline">
               CephasTech
             </span>
