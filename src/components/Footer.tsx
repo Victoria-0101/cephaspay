@@ -11,7 +11,7 @@ const Footer = () => {
               <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
                 <span className="text-primary-foreground font-extrabold text-xs">C</span>
               </div>
-              <span className="text-base font-bold">Cephaspay</span>
+              <span className="text-base font-bold">CephasTech</span>
             </div>
             <p className="text-xs text-background/60 leading-relaxed mb-3">
               Your trusted marketplace for phones, gadgets & electronics.
@@ -19,7 +19,7 @@ const Footer = () => {
             <div className="space-y-1 text-xs text-background/50">
               <p className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Lagos, Nigeria</p>
               <p className="flex items-center gap-1"><Phone className="h-3 w-3" /> +234 800 000 0000</p>
-              <p className="flex items-center gap-1"><Mail className="h-3 w-3" /> help@cephaspay.com</p>
+              <p className="flex items-center gap-1"><Mail className="h-3 w-3" /> <p className="flex items-center gap-1"><Mail className="h-3 w-3" /> help@cephastech.com</p></p>
             </div>
           </div>
 
@@ -43,7 +43,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-6 border-t border-background/10 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-[10px] text-background/40">© {new Date().getFullYear()} Cephaspay. All rights reserved.</p>
+          <p className="text-[10px] text-background/40">© {new Date().getFullYear()} <p className="text-[10px] text-background/40">© {new Date().getFullYear()} CephasTech. All rights reserved.</p></p>
           <div className="flex gap-4 text-[10px] text-background/40">
             <a href="#" className="hover:text-background luxury-transition">Privacy</a>
             <a href="#" className="hover:text-background luxury-transition">Terms</a>
