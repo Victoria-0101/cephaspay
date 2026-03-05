@@ -61,7 +61,7 @@ const Header = () => {
             <button className="font-semibold underline decoration-dotted">Lagos, NG</button>
           </div>
           <div className="flex items-center gap-4">
-            <a href="#" className="hover:underline"><a href="#" className="hover:underline">Sell on CephasTech</a></a>
+            <a href="#" className="hover:underline">Sell on CephasTech</a>
             <a href="#" className="hover:underline hidden sm:inline">Help</a>
           </div>
         </div>
