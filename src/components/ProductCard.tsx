@@ -70,9 +70,9 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
-          <span className="text-lg font-bold text-foreground">${product.price.toLocaleString()}</span>
+          <span className="text-lg font-bold text-foreground">₦{product.price.toLocaleString()}</span>
           {product.original_price > product.price && (
-            <span className="text-xs text-muted-foreground line-through">${product.original_price.toLocaleString()}</span>
+            <span className="text-xs text-muted-foreground line-through">₦{product.original_price.toLocaleString()}</span>
           )}
         </div>
 

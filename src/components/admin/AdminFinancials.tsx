@@ -65,7 +65,7 @@ const AdminFinancials = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total Revenue</p>
-                    <p className="text-xl font-bold">${totalRevenue.toFixed(2)}</p>
+                    <p className="text-xl font-bold">₦{totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                   </div>
                 </div>
               </CardContent>
@@ -78,7 +78,7 @@ const AdminFinancials = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Pending Balance</p>
-                    <p className="text-xl font-bold">${pendingRevenue.toFixed(2)}</p>
+                    <p className="text-xl font-bold">₦{pendingRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                   </div>
                 </div>
               </CardContent>
@@ -91,7 +91,7 @@ const AdminFinancials = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Transaction Fees</p>
-                    <p className="text-xl font-bold">${platformFees.toFixed(2)}</p>
+                    <p className="text-xl font-bold">₦{platformFees.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                     <p className="text-[10px] text-muted-foreground">2.9% processing</p>
                   </div>
                 </div>
@@ -105,7 +105,7 @@ const AdminFinancials = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Net Payout</p>
-                    <p className="text-xl font-bold">${netPayout.toFixed(2)}</p>
+                    <p className="text-xl font-bold">₦{netPayout.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                   </div>
                 </div>
               </CardContent>
@@ -150,9 +150,9 @@ const AdminFinancials = () => {
                         {new Date(tx.date).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-sm">{tx.customer}</TableCell>
-                      <TableCell className="text-sm font-medium">${tx.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-xs text-destructive">-${tx.fee.toFixed(2)}</TableCell>
-                      <TableCell className="text-sm font-semibold">${tx.net.toFixed(2)}</TableCell>
+                      <TableCell className="text-sm font-medium">₦{tx.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                      <TableCell className="text-xs text-destructive">-₦{tx.fee.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                      <TableCell className="text-sm font-semibold">₦{tx.net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                       <TableCell>
                         <Badge
                           variant={tx.status === "paid" ? "default" : tx.status === "refunded" ? "destructive" : "secondary"}

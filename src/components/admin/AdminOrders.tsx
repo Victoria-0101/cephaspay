@@ -78,7 +78,7 @@ const AdminOrders = () => {
                 <TableCell className="text-sm">
                   {Array.isArray(order.items) ? order.items.length : 0} items
                 </TableCell>
-                <TableCell className="font-semibold text-sm">${order.total}</TableCell>
+                <TableCell className="font-semibold text-sm">₦{Number(order.total).toLocaleString()}</TableCell>
                 <TableCell>
                   <Select
                     value={order.status}

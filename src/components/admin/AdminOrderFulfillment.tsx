@@ -115,7 +115,7 @@ const AdminOrderFulfillment = () => {
                           <p className="text-xs text-muted-foreground">
                             {Array.isArray(order.items) ? order.items.length : 0} items
                           </p>
-                          <p className="text-sm font-bold">${order.total}</p>
+                          <p className="text-sm font-bold">₦{Number(order.total).toLocaleString()}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -142,7 +142,7 @@ const AdminOrderFulfillment = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className="text-sm font-bold">${order.total}</p>
+                  <p className="text-sm font-bold">₦{Number(order.total).toLocaleString()}</p>
                   <Badge variant="outline" className={`capitalize text-xs ${statusConfig[order.status]?.color}`}>
                     {order.status}
                   </Badge>
@@ -174,7 +174,7 @@ const AdminOrderFulfillment = () => {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Total</p>
-                  <p className="text-lg font-bold">${selectedOrder.total}</p>
+                  <p className="text-lg font-bold">₦{Number(selectedOrder.total).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Status</p>
@@ -213,7 +213,7 @@ const AdminOrderFulfillment = () => {
                         <p className="text-sm">{item.name || `Item ${i + 1}`}</p>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Qty: {item.quantity || 1}</p>
-                          <p className="text-sm font-semibold">${item.price || "—"}</p>
+                          <p className="text-sm font-semibold">₦{item.price ? Number(item.price).toLocaleString() : "—"}</p>
                         </div>
                       </div>
                     ))}

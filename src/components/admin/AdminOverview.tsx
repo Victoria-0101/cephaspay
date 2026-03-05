@@ -101,7 +101,7 @@ const AdminOverview = () => {
         ) : (
           <>
             <KPICard
-              title="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} change="+12.5%"
+              title="Total Revenue" value={`₦${totalRevenue.toLocaleString()}`} change="+12.5%"
               icon={DollarSign} spark={[30, 45, 38, 52, 48, 60, 55]}
               color="bg-primary/10 text-primary"
             />
@@ -111,7 +111,7 @@ const AdminOverview = () => {
               color="bg-[hsl(var(--info))]/10 text-[hsl(var(--info))]"
             />
             <KPICard
-              title="Avg. Order Value" value={`$${avgOrderValue.toFixed(2)}`} change="+3.1%"
+              title="Avg. Order Value" value={`₦${avgOrderValue.toFixed(2)}`} change="+3.1%"
               icon={TrendingUp} spark={[40, 38, 45, 42, 48, 44, 50]}
               color="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]"
             />
@@ -143,7 +143,7 @@ const AdminOverview = () => {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis dataKey="month" className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                  <YAxis className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickFormatter={(v) => `$${v / 1000}k`} />
+                  <YAxis className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickFormatter={(v) => `₦${v / 1000}k`} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--popover))",
@@ -151,7 +151,7 @@ const AdminOverview = () => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+                    formatter={(value: number) => [`₦${value.toLocaleString()}`, "Revenue"]}
                   />
                   <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)" />
                 </AreaChart>
@@ -191,7 +191,7 @@ const AdminOverview = () => {
                         </div>
                       </TableCell>
                       <TableCell className="text-right py-2.5">
-                        <p className="text-xs font-semibold">${p.price}</p>
+                        <p className="text-xs font-semibold">₦{Number(p.price).toLocaleString()}</p>
                         <p className="text-[10px] text-muted-foreground">{p.stock_count} in stock</p>
                       </TableCell>
                     </TableRow>
