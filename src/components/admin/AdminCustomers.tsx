@@ -76,11 +76,11 @@ const AdminCustomers = () => {
         <Card className="flex-1">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-[hsl(var(--success))]/10 flex items-center justify-center">
-              <span className="text-[hsl(var(--success))] font-bold text-sm">$</span>
+              <span className="text-[hsl(var(--success))] font-bold text-sm">₦</span>
             </div>
             <div>
               <p className="text-2xl font-bold">
-                ${customers.length > 0 ? Math.round(customers.reduce((s, c) => s + c.totalSpent, 0) / customers.length) : 0}
+                ₦{customers.length > 0 ? Math.round(customers.reduce((s, c) => s + c.totalSpent, 0) / customers.length).toLocaleString() : 0}
               </p>
               <p className="text-xs text-muted-foreground">Avg. Lifetime Value</p>
             </div>
@@ -133,7 +133,7 @@ const AdminCustomers = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{c.orders}</TableCell>
-                    <TableCell className="text-sm font-semibold">${c.totalSpent.toFixed(2)}</TableCell>
+                    <TableCell className="text-sm font-semibold">₦{c.totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {new Date(c.lastOrder).toLocaleDateString()}
                     </TableCell>

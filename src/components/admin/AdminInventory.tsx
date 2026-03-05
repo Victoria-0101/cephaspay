@@ -256,7 +256,7 @@ const AdminInventory = () => {
                           className="text-sm font-semibold hover:text-primary cursor-pointer"
                           onClick={() => { setInlineEditing({ id: p.id, field: "price" }); setInlineValue(String(p.price)); }}
                         >
-                          ${p.price}
+                          ₦{Number(p.price).toLocaleString()}
                         </button>
                       )}
                     </TableCell>

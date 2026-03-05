@@ -151,8 +151,8 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>Sign In</DropdownMenuItem>
-                <DropdownMenuItem>Create Account</DropdownMenuItem>
+                <DropdownMenuItem asChild><a href="/login">Sign In</a></DropdownMenuItem>
+                <DropdownMenuItem asChild><a href="/login">Create Account</a></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Your Orders</DropdownMenuItem>
                 <DropdownMenuItem>Wish List</DropdownMenuItem>
@@ -217,10 +217,10 @@ const Header = () => {
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-border bg-background animate-fade-in">
           <div className="container mx-auto px-4 py-4 space-y-3">
-            <div className="flex items-center gap-2 py-2 border-b border-border pb-3">
+            <a href="/login" className="flex items-center gap-2 py-2 border-b border-border pb-3">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Hello, Sign in</span>
-            </div>
+            </a>
             {megaMenuCategories.map((cat) => (
               <div key={cat.title}>
                 <h4 className="text-sm font-semibold text-foreground mb-1">{cat.title}</h4>
