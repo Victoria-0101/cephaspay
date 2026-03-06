@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingCart, Star, ChevronLeft, Minus, Plus, Truck, Shield, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { useCart } from "@/hooks/useCart";
 
 const badgeConfig = {
   "best-seller": { label: "Best Seller", className: "bg-primary text-primary-foreground" },
@@ -28,6 +29,7 @@ const ProductDetail = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const product = products.find((p) => p.id === id);
+  const { addItem } = useCart();
 
   if (!product) {
     return (
@@ -46,6 +48,15 @@ const ProductDetail = () => {
   const images = [product.image, product.image, product.image];
 
   const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      original_price: product.original_price,
+      image: product.image,
+      vendor_name: product.vendor_name,
+      stock_count: product.stock_count,
+    }, quantity);
     toast.success(`${quantity}x ${product.name.slice(0, 30)}... added to cart`);
   };
 

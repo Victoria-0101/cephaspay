@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 interface ProductCardProps {
   product: Product;
@@ -18,9 +19,19 @@ const badgeConfig = {
 
 const ProductCard = ({ product, index }: ProductCardProps) => {
   const navigate = useNavigate();
+  const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      original_price: product.original_price,
+      image: product.image,
+      vendor_name: product.vendor_name,
+      stock_count: product.stock_count,
+    });
     toast.success(`${product.name.slice(0, 30)}... added to cart`);
   };
 
