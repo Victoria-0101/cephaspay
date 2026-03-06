@@ -3,6 +3,7 @@ import { ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +17,8 @@ const badgeConfig = {
 };
 
 const ProductCard = ({ product, index }: ProductCardProps) => {
+  const navigate = useNavigate();
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success(`${product.name.slice(0, 30)}... added to cart`);
@@ -23,8 +26,9 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
 
   return (
     <div
-      className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg luxury-transition opacity-0 animate-fade-in"
+      className="group bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg luxury-transition opacity-0 animate-fade-in cursor-pointer"
       style={{ animationDelay: `${index * 80}ms` }}
+      onClick={() => navigate(`/product/${product.id}`)}
     >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-secondary">
