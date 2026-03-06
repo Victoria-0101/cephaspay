@@ -1,6 +1,8 @@
 import { Search, ShoppingCart, User, MapPin, ChevronDown, Menu, X, Clock } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,8 @@ const Header = () => {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { totalItems } = useCart();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -161,11 +165,13 @@ const Header = () => {
             </DropdownMenu>
 
             {/* Cart */}
-            <Button variant="ghost" size="sm" className="relative h-10 px-2">
+            <Button variant="ghost" size="sm" className="relative h-10 px-2" onClick={() => navigate("/cart")}>
               <ShoppingCart className="h-5 w-5" />
-              <Badge className="absolute -top-0.5 -right-0.5 h-5 min-w-[20px] p-0 flex items-center justify-center text-[10px] font-bold rounded-full">
-                3
-              </Badge>
+              {totalItems > 0 && (
+                <Badge className="absolute -top-0.5 -right-0.5 h-5 min-w-[20px] p-0 flex items-center justify-center text-[10px] font-bold rounded-full">
+                  {totalItems}
+                </Badge>
+              )}
             </Button>
           </div>
         </div>

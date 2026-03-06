@@ -1,20 +1,26 @@
 import { Home, Search, ShoppingCart, User, Grid3X3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-const tabs = [
-  { icon: Home, label: "Home" },
-  { icon: Grid3X3, label: "Categories" },
-  { icon: Search, label: "Search" },
-  { icon: ShoppingCart, label: "Cart", badge: 3 },
-  { icon: User, label: "Account" },
-];
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
 
 const BottomTabBar = () => {
+  const navigate = useNavigate();
+  const { totalItems } = useCart();
+
+  const tabs = [
+    { icon: Home, label: "Home", action: () => navigate("/") },
+    { icon: Grid3X3, label: "Categories", action: () => navigate("/") },
+    { icon: Search, label: "Search", action: () => navigate("/") },
+    { icon: ShoppingCart, label: "Cart", badge: totalItems || undefined, action: () => navigate("/cart") },
+    { icon: User, label: "Account", action: () => navigate("/login") },
+  ];
+
   return (
     <div className="bottom-tab-bar">
       {tabs.map((tab) => (
         <button
           key={tab.label}
+          onClick={tab.action}
           className="flex flex-col items-center justify-center gap-0.5 text-muted-foreground hover:text-primary luxury-transition relative px-3 py-1"
         >
           <div className="relative">
