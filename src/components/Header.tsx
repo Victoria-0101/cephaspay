@@ -3,6 +3,7 @@ import logo from "@/assets/logo.jpg";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const Header = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { totalItems } = useCart();
+  const { user, isAdmin, signOut } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -148,19 +150,31 @@ const Header = () => {
                 <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-1 text-xs h-10">
                   <User className="h-4 w-4" />
                   <div className="text-left">
-                    <span className="text-[10px] text-muted-foreground block leading-none">Hello, Sign in</span>
+                    <span className="text-[10px] text-muted-foreground block leading-none">
+                      {user ? `Hello, ${user.email?.split("@")[0]}` : "Hello, Sign in"}
+                    </span>
                     <span className="font-semibold text-xs leading-none">Account</span>
                   </div>
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild><a href="/login">Sign In</a></DropdownMenuItem>
-                <DropdownMenuItem asChild><a href="/login">Create Account</a></DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Your Orders</DropdownMenuItem>
-                <DropdownMenuItem>Wish List</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                {user ? (
+                  <>
+                    <DropdownMenuItem className="text-xs text-muted-foreground" disabled>{user.email}</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {isAdmin && <DropdownMenuItem onClick={() => navigate("/admin")}>Admin Dashboard</DropdownMenuItem>}
+                    <DropdownMenuItem>Your Orders</DropdownMenuItem>
+                    <DropdownMenuItem>Wish List</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>Sign Out</DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/login")}>Sign In</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/login")}>Create Account</DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -223,10 +237,20 @@ const Header = () => {
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-border bg-background animate-fade-in">
           <div className="container mx-auto px-4 py-4 space-y-3">
-            <a href="/login" className="flex items-center gap-2 py-2 border-b border-border pb-3">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Hello, Sign in</span>
-            </a>
+            {user ? (
+              <div className="flex items-center justify-between py-2 border-b border-border pb-3">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Hello, {user.email?.split("@")[0]}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => signOut()}>Sign Out</Button>
+              </div>
+            ) : (
+              <a href="/login" className="flex items-center gap-2 py-2 border-b border-border pb-3">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Hello, Sign in</span>
+              </a>
+            )}
             {megaMenuCategories.map((cat) => (
               <div key={cat.title}>
                 <h4 className="text-sm font-semibold text-foreground mb-1">{cat.title}</h4>
