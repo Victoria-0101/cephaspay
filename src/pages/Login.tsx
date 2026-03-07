@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,10 +30,18 @@ const Login = () => {
     if (error) {
       toast.error(error.message);
     } else if (isSignUp) {
+      // Notify admin about new registration
+      try {
+        await supabase.functions.invoke("notify-registration", {
+          body: { email, type: "signup" },
+        });
+      } catch (e) {
+        console.error("Failed to send registration notification:", e);
+      }
       toast.success("Account created! Check your email to confirm.");
     } else {
       toast.success("Signed in successfully");
-      navigate("/admin");
+      navigate("/");
     }
   };
 
@@ -43,9 +52,9 @@ const Login = () => {
           <div className="flex justify-center mb-4">
             <img src={logo} alt="CephasTech" className="h-16 w-auto" />
           </div>
-          <CardTitle className="text-2xl">{isSignUp ? "Create Account" : "Admin Login"}</CardTitle>
+          <CardTitle className="text-2xl">{isSignUp ? "Create Account" : "Sign In"}</CardTitle>
           <CardDescription>
-            {isSignUp ? "Sign up for a CephasTech account" : "Sign in to access the admin dashboard"}
+            {isSignUp ? "Sign up for a CephasTech account" : "Sign in to your CephasTech account"}
           </CardDescription>
         </CardHeader>
         <CardContent>

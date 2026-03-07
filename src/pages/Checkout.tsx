@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +12,11 @@ import { CheckCircle } from "lucide-react";
 
 const Checkout = () => {
   const { items, totalPrice, totalItems, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", state: "" });
+  const [form, setForm] = useState({ name: "", email: user?.email || "", phone: "", address: "", city: "", state: "" });
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -28,12 +31,43 @@ const Checkout = () => {
       toast.error("Please fill all required fields");
       return;
     }
+
+    if (!user) {
+      toast.error("Please sign in to place an order");
+      navigate("/login");
+      return;
+    }
+
     setPlacing(true);
-    // Simulate order placement
-    await new Promise((r) => setTimeout(r, 1500));
-    clearCart();
-    setPlaced(true);
-    setPlacing(false);
+
+    try {
+      const orderItems = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      }));
+
+      const { error } = await supabase.from("orders").insert({
+        user_id: user.id,
+        customer_name: form.name,
+        customer_email: form.email,
+        items: orderItems,
+        total: totalPrice,
+        shipping_address: `${form.address}, ${form.city}, ${form.state}`,
+        status: "pending",
+      });
+
+      if (error) throw error;
+
+      clearCart();
+      setPlaced(true);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to place order");
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (placed) {
@@ -54,9 +88,15 @@ const Checkout = () => {
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-foreground mb-6">Checkout</h1>
 
+        {!user && (
+          <div className="bg-accent/50 border border-border rounded-lg p-4 mb-6 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Please sign in to place your order</p>
+            <Button size="sm" onClick={() => navigate("/login")}>Sign In</Button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Shipping Info */}
             <div className="lg:col-span-2 space-y-5">
               <div className="bg-card border border-border rounded-lg p-5 space-y-4">
                 <h2 className="font-bold text-foreground">Shipping Information</h2>
@@ -89,7 +129,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-card border border-border rounded-lg p-5 sticky top-32 space-y-4">
                 <h2 className="font-bold text-foreground">Order Summary</h2>
@@ -118,7 +157,7 @@ const Checkout = () => {
                     <span>₦{totalPrice.toLocaleString()}</span>
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-full h-11 font-semibold" disabled={placing}>
+                <Button type="submit" className="w-full rounded-full h-11 font-semibold" disabled={placing || !user}>
                   {placing ? "Placing Order..." : "Place Order"}
                 </Button>
               </div>
