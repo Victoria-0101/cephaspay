@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Pencil, Trash2, Package, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Search, Filter, ChevronLeft, ChevronRight, Upload, ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProductForm {
@@ -38,7 +38,39 @@ const AdminInventory = () => {
   const [page, setPage] = useState(0);
   const [inlineEditing, setInlineEditing] = useState<{ id: string; field: string } | null>(null);
   const [inlineValue, setInlineValue] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop();
+    const fileName = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from("product-images").getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      set("image", url);
+      toast.success("Image uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -390,9 +422,57 @@ const AdminInventory = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Image URL</Label>
-              <Input value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="https://..." />
-              {form.image && <img src={form.image} alt="Preview" className="h-20 w-20 rounded-lg object-cover border" />}
+              <Label>Product Image</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              {form.image ? (
+                <div className="relative inline-block">
+                  <img src={form.image} alt="Preview" className="h-28 w-28 rounded-lg object-cover border border-border" />
+                  <button
+                    type="button"
+                    onClick={() => set("image", "")}
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-sm hover:bg-destructive/90"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full h-28 rounded-lg border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-5 w-5" />
+                      <span className="text-xs">Click to upload image</span>
+                    </>
+                  )}
+                </button>
+              )}
+              {form.image && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-1"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  <ImageIcon className="h-3.5 w-3.5 mr-1" /> Replace Image
+                </Button>
+              )}
             </div>
             <Button type="submit" className="w-full" disabled={upsertMutation.isPending}>
               {upsertMutation.isPending ? "Saving..." : editingId ? "Update Product" : "Add Product"}
