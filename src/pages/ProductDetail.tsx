@@ -62,7 +62,7 @@ const ProductDetail = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 max-w-5xl">
         {/* Back button */}
         <button
           onClick={() => navigate(-1)}
