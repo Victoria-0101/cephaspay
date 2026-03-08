@@ -1,26 +1,51 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import HeroCarousel from "@/components/HeroCarousel";
 import FilterSidebar from "@/components/FilterSidebar";
-import { products } from "@/data/products";
+import { products as staticProducts } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
+import { Product } from "@/types/product";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState([0, 1500]);
+  const [priceRange, setPriceRange] = useState([0, 1500000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
 
-  // Simulate loading
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(t);
-  }, []);
+  const { data: dbProducts, isLoading: loading } = useQuery({
+    queryKey: ["storefront-products"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("*");
+      if (error) throw error;
+      return (data || []).map((p): Product => ({
+        id: p.id,
+        name: p.name,
+        vendor_name: p.vendor_name,
+        price: Number(p.price),
+        original_price: Number(p.original_price ?? p.price),
+        discount_percentage: p.original_price && p.original_price > p.price
+          ? Math.round(((Number(p.original_price) - Number(p.price)) / Number(p.original_price)) * 100)
+          : 0,
+        image: p.image || "/placeholder.svg",
+        category: p.category,
+        description: p.description || "",
+        rating: Number(p.rating ?? 0),
+        review_count: p.review_count ?? 0,
+        stock_count: p.stock_count,
+        badge: (p.badge === "best-seller" || p.badge === "limited-stock" || p.badge === "deal") ? p.badge : undefined,
+        sku: p.sku || "",
+        specifications: (p.specifications as Record<string, string>) || {},
+      }));
+    },
+  });
+
+  const products = [...(dbProducts || []), ...staticProducts];
 
   const filtered = products.filter((p) => {
     if (selectedCategory !== "All" && p.category !== selectedCategory) return false;
@@ -101,7 +126,7 @@ const Index = () => {
                 <p className="text-muted-foreground text-sm">No products match your filters.</p>
                 <Button variant="outline" size="sm" className="mt-3" onClick={() => {
                   setSelectedCategory("All");
-                  setPriceRange([0, 1500]);
+                  setPriceRange([0, 1500000]);
                   setSelectedBrands([]);
                   setMinRating(0);
                   setInStockOnly(false);
