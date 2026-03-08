@@ -126,7 +126,7 @@ const Index = () => {
                 <p className="text-muted-foreground text-sm">No products match your filters.</p>
                 <Button variant="outline" size="sm" className="mt-3" onClick={() => {
                   setSelectedCategory("All");
-                  setPriceRange([0, 1500]);
+                  setPriceRange([0, 1500000]);
                   setSelectedBrands([]);
                   setMinRating(0);
                   setInStockOnly(false);
