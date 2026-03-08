@@ -36,13 +36,6 @@ const Checkout = () => {
 
   const verifyPayment = async (reference: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke("paystack", {
-        body: { reference },
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      });
-
-      // Construct full URL with query param
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/paystack?action=verify`,
