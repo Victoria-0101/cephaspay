@@ -1,6 +1,7 @@
 import Header from "./Header";
 import Footer from "./Footer";
 import BottomTabBar from "./BottomTabBar";
+import WhatsAppButton from "./WhatsAppButton";
 
 interface LayoutProps {
   children: React.ReactNode;
