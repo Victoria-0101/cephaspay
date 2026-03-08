@@ -9,7 +9,7 @@ import FilterSidebar from "@/components/FilterSidebar";
 import { products as staticProducts } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
