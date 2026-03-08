@@ -3,13 +3,30 @@ import { ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 
 interface ProductCardProps {
   product: Product;
   index: number;
 }
+
+const HighlightText = ({ text, query }: { text: string; query: string }) => {
+  if (!query) return <>{text}</>;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">{part}</mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+};
 
 const badgeConfig = {
   "best-seller": { label: "Best Seller", className: "bg-primary text-primary-foreground" },
@@ -19,6 +36,8 @@ const badgeConfig = {
 
 const ProductCard = ({ product, index }: ProductCardProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -63,9 +82,11 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
 
       {/* Info */}
       <div className="p-3 space-y-1.5">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{product.vendor_name}</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <HighlightText text={product.vendor_name} query={searchQuery} />
+        </p>
         <h3 className="text-sm font-medium text-foreground leading-snug line-clamp-2 min-h-[2.5rem]">
-          {product.name}
+          <HighlightText text={product.name} query={searchQuery} />
         </h3>
 
         {/* Rating */}
