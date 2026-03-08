@@ -13,6 +13,7 @@ import { ArrowRight, TrendingUp, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("q")?.toLowerCase() || "";
   const [selectedCategory, setSelectedCategory] = useState("All");
