@@ -82,9 +82,11 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
 
       {/* Info */}
       <div className="p-3 space-y-1.5">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{product.vendor_name}</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <HighlightText text={product.vendor_name} query={searchQuery} />
+        </p>
         <h3 className="text-sm font-medium text-foreground leading-snug line-clamp-2 min-h-[2.5rem]">
-          {product.name}
+          <HighlightText text={product.name} query={searchQuery} />
         </h3>
 
         {/* Rating */}
