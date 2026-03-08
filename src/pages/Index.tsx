@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
@@ -9,10 +9,11 @@ import FilterSidebar from "@/components/FilterSidebar";
 import { products as staticProducts } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("q")?.toLowerCase() || "";
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -126,16 +127,45 @@ const Index = () => {
             </div>
 
             {!loading && filtered.length === 0 && (
-              <div className="text-center py-16">
-                <p className="text-muted-foreground text-sm">No products match your filters.</p>
-                <Button variant="outline" size="sm" className="mt-3" onClick={() => {
+              <div className="text-center py-20 space-y-4">
+                <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center">
+                  <SearchX className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-semibold text-foreground">No results found</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    {searchQuery
+                      ? `We couldn't find anything matching "${searchParams.get("q")}". Try a different search term.`
+                      : "No products match your current filters. Try adjusting them."}
+                  </p>
+                </div>
+                {searchQuery && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">Try searching for:</p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {["iPhone", "Samsung", "Charger", "Headphones", "Laptop"].map((term) => (
+                        <Button
+                          key={term}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full text-xs h-7"
+                          onClick={() => navigate(`/?q=${encodeURIComponent(term)}`)}
+                        >
+                          {term}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <Button variant="outline" size="sm" className="mt-2" onClick={() => {
                   setSelectedCategory("All");
                   setPriceRange([0, 1500000]);
                   setSelectedBrands([]);
                   setMinRating(0);
                   setInStockOnly(false);
+                  navigate("/");
                 }}>
-                  Clear Filters
+                  Clear All Filters
                 </Button>
               </div>
             )}
