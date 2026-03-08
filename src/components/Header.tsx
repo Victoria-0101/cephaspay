@@ -1,7 +1,7 @@
 import { Search, ShoppingCart, User, MapPin, ChevronDown, Menu, X, Clock } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
