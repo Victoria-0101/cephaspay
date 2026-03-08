@@ -3,13 +3,30 @@ import { ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 
 interface ProductCardProps {
   product: Product;
   index: number;
 }
+
+const HighlightText = ({ text, query }: { text: string; query: string }) => {
+  if (!query) return <>{text}</>;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">{part}</mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+};
 
 const badgeConfig = {
   "best-seller": { label: "Best Seller", className: "bg-primary text-primary-foreground" },
