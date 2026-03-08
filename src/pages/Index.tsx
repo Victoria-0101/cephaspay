@@ -105,7 +105,7 @@ const Index = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-primary" />
                 <h2 className="text-lg font-bold text-foreground">
-                  {selectedCategory === "All" ? "All Products" : selectedCategory}
+                  {searchQuery ? `Results for "${searchParams.get("q")}"` : selectedCategory === "All" ? "All Products" : selectedCategory}
                 </h2>
                 <span className="text-xs text-muted-foreground">({filtered.length} results)</span>
               </div>
