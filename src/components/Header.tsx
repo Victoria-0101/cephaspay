@@ -150,7 +150,7 @@ const Header = () => {
                   <button
                     key={term}
                     className="w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent luxury-transition"
-                    onClick={() => { setSearchQuery(term); setSearchFocused(false); }}
+                    onClick={() => { setSearchQuery(term); setSearchFocused(false); navigate(`/?q=${encodeURIComponent(term)}`); }}
                   >
                     {term}
                   </button>
