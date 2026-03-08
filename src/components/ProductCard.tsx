@@ -36,6 +36,8 @@ const badgeConfig = {
 
 const ProductCard = ({ product, index }: ProductCardProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
