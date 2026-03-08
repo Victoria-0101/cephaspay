@@ -132,9 +132,10 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
-              <Button size="icon" className="h-10 w-11 rounded-l-none shrink-0">
+              <Button size="icon" className="h-10 w-11 rounded-l-none shrink-0" onClick={handleSearch}>
                 <Search className="h-4 w-4" />
               </Button>
             </div>
