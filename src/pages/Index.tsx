@@ -13,6 +13,8 @@ import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q")?.toLowerCase() || "";
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 1500000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
