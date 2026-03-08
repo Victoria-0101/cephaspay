@@ -1,26 +1,28 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import HeroCarousel from "@/components/HeroCarousel";
-import FilterSidebar from "@/components/FilterSidebar";
+import HorizontalFilterBar from "@/components/HorizontalFilterBar";
+import QuickViewDialog from "@/components/QuickViewDialog";
 import { products as staticProducts } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
-import { ArrowRight, TrendingUp, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get("q")?.toLowerCase() || "";
+  const urlQuery = searchParams.get("q")?.toLowerCase() || "";
+
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState([0, 1500000]);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [minRating, setMinRating] = useState(0);
-  const [inStockOnly, setInStockOnly] = useState(false);
+  const [sortBy, setSortBy] = useState("default");
+  const [selectedBrand, setSelectedBrand] = useState("all");
+  const [localSearch, setLocalSearch] = useState("");
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   const { data: dbProducts, isLoading: loading } = useQuery({
     queryKey: ["storefront-products"],
@@ -50,128 +52,113 @@ const Index = () => {
   });
 
   const products = [...(dbProducts || []), ...staticProducts];
+  const searchQuery = urlQuery || localSearch.toLowerCase();
 
-  const filtered = products.filter((p) => {
-    if (searchQuery && !p.name.toLowerCase().includes(searchQuery) && !p.description?.toLowerCase().includes(searchQuery) && !p.category.toLowerCase().includes(searchQuery)) return false;
-    if (selectedCategory !== "All" && p.category !== selectedCategory) return false;
-    if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
-    if (selectedBrands.length > 0 && !selectedBrands.some((b) => p.vendor_name.toLowerCase().includes(b.toLowerCase()))) return false;
-    if (p.rating < minRating) return false;
-    if (inStockOnly && p.stock_count === 0) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    let result = products.filter((p) => {
+      if (searchQuery && !p.name.toLowerCase().includes(searchQuery) && !p.description?.toLowerCase().includes(searchQuery) && !p.category.toLowerCase().includes(searchQuery)) return false;
+      if (selectedCategory !== "All" && p.category !== selectedCategory) return false;
+      if (selectedBrand !== "all" && !p.vendor_name.toLowerCase().includes(selectedBrand.toLowerCase())) return false;
+      return true;
+    });
+
+    switch (sortBy) {
+      case "price-asc": result.sort((a, b) => a.price - b.price); break;
+      case "price-desc": result.sort((a, b) => b.price - a.price); break;
+      case "rating": result.sort((a, b) => b.rating - a.rating); break;
+      default: break;
+    }
+
+    return result;
+  }, [products, searchQuery, selectedCategory, selectedBrand, sortBy]);
+
+  const clearAll = () => {
+    setSelectedCategory("All");
+    setSortBy("default");
+    setSelectedBrand("all");
+    setLocalSearch("");
+    navigate("/");
+  };
 
   return (
     <Layout>
-      {/* Hero */}
       <HeroCarousel />
 
-      {/* Category quick links */}
-      <section className="container mx-auto px-4 py-6">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {["Phones", "Accessories", "Electronics", "Deals", "New Arrivals", "Best Sellers"].map((cat) => (
-            <Button
-              key={cat}
-              variant="outline"
-              size="sm"
-              className="shrink-0 rounded-full text-xs h-8"
-              onClick={() => setSelectedCategory(cat === "Deals" || cat === "New Arrivals" || cat === "Best Sellers" ? "All" : cat)}
-            >
-              {cat}
-            </Button>
-          ))}
+      <section id="products" className="container mx-auto px-4 py-6 pb-10">
+        {/* Horizontal filter bar */}
+        <HorizontalFilterBar
+          searchQuery={urlQuery ? searchParams.get("q") || "" : localSearch}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          selectedBrand={selectedBrand}
+          onBrandChange={setSelectedBrand}
+          onSearchChange={(val) => {
+            setLocalSearch(val);
+            if (urlQuery) navigate("/");
+          }}
+          resultCount={filtered.length}
+        />
+
+        {/* Product grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : filtered.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
         </div>
-      </section>
 
-      {/* Products Section */}
-      <section className="container mx-auto px-4 pb-10">
-        <div className="flex items-start gap-8">
-          {/* Sidebar */}
-          <FilterSidebar
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            priceRange={priceRange}
-            onPriceRangeChange={setPriceRange}
-            selectedBrands={selectedBrands}
-            onBrandsChange={setSelectedBrands}
-            minRating={minRating}
-            onMinRatingChange={setMinRating}
-            inStockOnly={inStockOnly}
-            onInStockOnlyChange={setInStockOnly}
-          />
-
-          {/* Grid */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <h2 className="text-lg font-bold text-foreground">
-                  {searchQuery ? `Results for "${searchParams.get("q")}"` : selectedCategory === "All" ? "All Products" : selectedCategory}
-                </h2>
-                <span className="text-xs text-muted-foreground">({filtered.length} results)</span>
-              </div>
-              <a
-                href="#"
-                className="text-xs font-medium text-primary hover:text-primary/80 luxury-transition flex items-center gap-1"
-              >
-                View all <ArrowRight className="h-3 w-3" />
-              </a>
+        {!loading && filtered.length === 0 && (
+          <div className="text-center py-20 space-y-4">
+            <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center">
+              <SearchX className="h-10 w-10 text-muted-foreground" />
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-              {loading
-                ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-                : filtered.map((product, index) => (
-                    <ProductCard key={product.id} product={product} index={index} />
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold text-foreground">No results found</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {searchQuery
+                  ? `We couldn't find anything matching "${searchQuery}". Try a different search term.`
+                  : "No products match your current filters. Try adjusting them."}
+              </p>
+            </div>
+            {searchQuery && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Try searching for:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {["iPhone", "Samsung", "Charger", "Headphones", "Laptop"].map((term) => (
+                    <Button
+                      key={term}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full text-xs h-7"
+                      onClick={() => navigate(`/?q=${encodeURIComponent(term)}`)}
+                    >
+                      {term}
+                    </Button>
                   ))}
-            </div>
-
-            {!loading && filtered.length === 0 && (
-              <div className="text-center py-20 space-y-4">
-                <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center">
-                  <SearchX className="h-10 w-10 text-muted-foreground" />
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-semibold text-foreground">No results found</h3>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    {searchQuery
-                      ? `We couldn't find anything matching "${searchParams.get("q")}". Try a different search term.`
-                      : "No products match your current filters. Try adjusting them."}
-                  </p>
-                </div>
-                {searchQuery && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">Try searching for:</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {["iPhone", "Samsung", "Charger", "Headphones", "Laptop"].map((term) => (
-                        <Button
-                          key={term}
-                          variant="outline"
-                          size="sm"
-                          className="rounded-full text-xs h-7"
-                          onClick={() => navigate(`/?q=${encodeURIComponent(term)}`)}
-                        >
-                          {term}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <Button variant="outline" size="sm" className="mt-2" onClick={() => {
-                  setSelectedCategory("All");
-                  setPriceRange([0, 1500000]);
-                  setSelectedBrands([]);
-                  setMinRating(0);
-                  setInStockOnly(false);
-                  navigate("/");
-                }}>
-                  Clear All Filters
-                </Button>
               </div>
             )}
+            <Button variant="outline" size="sm" className="mt-2" onClick={clearAll}>
+              Clear All Filters
+            </Button>
           </div>
-        </div>
+        )}
       </section>
+
+      {/* Quick View Modal */}
+      <QuickViewDialog
+        product={quickViewProduct}
+        open={!!quickViewProduct}
+        onOpenChange={(open) => !open && setQuickViewProduct(null)}
+      />
     </Layout>
   );
 };

@@ -6,6 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { toast } from "sonner";
 
+const contactItems = [
+  { icon: MapPin, title: "Our Address", detail: "Oluere Junction, Off Sabo, Ilare, Ile-Ife, Osun State, Nigeria" },
+  { icon: Phone, title: "Phone", detail: "+234 703 083 8269", href: "tel:+2347030838269" },
+  { icon: Mail, title: "Email", detail: "cephaspay1@gmail.com", href: "mailto:cephaspay1@gmail.com" },
+  { icon: Clock, title: "Business Hours", detail: "Mon – Sat: 8AM – 7PM · Sun: 10AM – 4PM" },
+];
+
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
@@ -17,60 +24,53 @@ const Contact = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-2">Contact Us</h1>
-        <p className="text-muted-foreground mb-10">We'd love to hear from you. Reach out anytime!</p>
+      <div className="container mx-auto px-4 py-16 max-w-5xl">
+        {/* Header */}
+        <div className="text-center mb-14">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-3">Get in Touch</h1>
+          <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+            Have a question or need help? We'd love to hear from you.
+          </p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-5 gap-10">
           {/* Contact Info */}
-          <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <MapPin className="h-5 w-5 text-primary mt-1 shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Our Address</h3>
-                <p className="text-sm text-muted-foreground">Oluere Junction, Off Sabo, Ilare, Ile-Ife, Osun State, Nigeria</p>
+          <div className="lg:col-span-2 space-y-6">
+            {contactItems.map(({ icon: Icon, title, detail, href }) => (
+              <div key={title} className="flex items-start gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-0.5">{title}</h3>
+                  {href ? (
+                    <a href={href} className="text-sm text-muted-foreground hover:text-primary luxury-transition">{detail}</a>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">{detail}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <Phone className="h-5 w-5 text-primary mt-1 shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Phone</h3>
-                <a href="tel:+2347030838269" className="text-sm text-muted-foreground hover:text-primary">+234 703 083 8269</a>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <Mail className="h-5 w-5 text-primary mt-1 shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Email</h3>
-                <a href="mailto:cephaspay1@gmail.com" className="text-sm text-muted-foreground hover:text-primary">cephaspay1@gmail.com</a>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <Clock className="h-5 w-5 text-primary mt-1 shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Business Hours</h3>
-                <p className="text-sm text-muted-foreground">Mon – Sat: 8:00 AM – 7:00 PM</p>
-                <p className="text-sm text-muted-foreground">Sun: 10:00 AM – 4:00 PM</p>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 bg-card border border-border rounded-lg p-6">
-            <h3 className="font-semibold text-lg mb-2">Send us a message</h3>
-            <Input
-              placeholder="Your Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-            <Input
-              type="email"
-              placeholder="Your Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
-            />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="lg:col-span-3 bg-card border border-border rounded-lg p-8 space-y-5">
+            <h3 className="text-lg font-semibold text-foreground mb-1">Send us a message</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Input
+                placeholder="Your Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+              <Input
+                type="email"
+                placeholder="Your Email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+            </div>
             <Textarea
               placeholder="Your Message"
               rows={5}
@@ -78,7 +78,7 @@ const Contact = () => {
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               required
             />
-            <Button type="submit" className="w-full">Send Message</Button>
+            <Button type="submit" className="w-full h-11 font-semibold">Send Message</Button>
           </form>
         </div>
       </div>
