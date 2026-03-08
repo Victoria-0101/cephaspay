@@ -1,36 +1,23 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CountdownTimer from "./CountdownTimer";
 
 const slides = [
   {
-    title: "Flash Sale: Up to 30% Off",
-    subtitle: "Premium headphones, chargers & more — limited time only.",
-    cta: "Shop Flash Sale",
-    bg: "from-primary/10 to-primary/5",
-    image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=800&h=400&fit=crop",
-    flash: true,
-  },
-  {
     title: "iPhone 15 Pro Max",
-    subtitle: "Titanium. A17 Pro. The most powerful iPhone ever. Starting at $1,099.",
+    subtitle: "Titanium. A17 Pro. The most powerful iPhone ever. Starting at ₦1,099.",
     cta: "Shop Now",
     bg: "from-secondary to-muted",
     image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&h=400&fit=crop",
-    flash: false,
   },
   {
     title: "Galaxy S24 Ultra — 15% Off",
     subtitle: "Galaxy AI is here. Titanium frame. 200MP camera.",
     cta: "See the Deal",
-    bg: "from-info/10 to-info/5",
+    bg: "from-primary/10 to-primary/5",
     image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&h=400&fit=crop",
-    flash: false,
   },
 ];
-
-const flashSaleEnd = new Date(Date.now() + 8 * 60 * 60 * 1000); // 8 hours from now
 
 const HeroCarousel = () => {
   const [current, setCurrent] = useState(0);
@@ -50,14 +37,6 @@ const HeroCarousel = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-6 py-8 md:py-12 min-h-[280px] md:min-h-[340px]">
             <div className="flex-1 space-y-3 text-center md:text-left">
-              {slide.flash && (
-                <div className="flex items-center gap-2 justify-center md:justify-start">
-                  <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                    <Zap className="h-3 w-3" /> Flash Sale
-                  </span>
-                  <CountdownTimer targetDate={flashSaleEnd} />
-                </div>
-              )}
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
                 {slide.title}
               </h2>
