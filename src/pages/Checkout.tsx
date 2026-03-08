@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,24 +8,76 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, CreditCard, Loader2, ShieldCheck } from "lucide-react";
 
 const Checkout = () => {
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [form, setForm] = useState({ name: "", email: user?.email || "", phone: "", address: "", city: "", state: "" });
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
-  if (items.length === 0 && !placed) {
+  // Handle Paystack callback — verify payment when redirected back
+  useEffect(() => {
+    const reference = searchParams.get("reference");
+    const trxref = searchParams.get("trxref");
+    const ref = reference || trxref;
+
+    if (ref && !verifying && !placed) {
+      setVerifying(true);
+      verifyPayment(ref);
+    }
+  }, [searchParams]);
+
+  const verifyPayment = async (reference: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("paystack", {
+        body: { reference },
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+
+      // Construct full URL with query param
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/paystack?action=verify`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ reference }),
+        }
+      );
+
+      const result = await res.json();
+
+      if (result.status && result.data?.status === "success") {
+        clearCart();
+        setPlaced(true);
+        toast.success("Payment successful! Your order is confirmed.");
+      } else {
+        toast.error("Payment verification failed. Please contact support.");
+      }
+    } catch (err: any) {
+      toast.error("Could not verify payment. Please contact support.");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  if (items.length === 0 && !placed && !verifying && !searchParams.get("reference") && !searchParams.get("trxref")) {
     navigate("/cart");
     return null;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePayWithPaystack = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.phone || !form.address) {
       toast.error("Please fill all required fields");
@@ -41,6 +93,7 @@ const Checkout = () => {
     setPlacing(true);
 
     try {
+      // 1. Create the order first with "pending" status
       const orderItems = items.map((item) => ({
         id: item.id,
         name: item.name,
@@ -49,33 +102,83 @@ const Checkout = () => {
         image: item.image,
       }));
 
-      const { error } = await supabase.from("orders").insert({
-        user_id: user.id,
-        customer_name: form.name,
-        customer_email: form.email,
-        items: orderItems,
-        total: totalPrice,
-        shipping_address: `${form.address}, ${form.city}, ${form.state}`,
-        status: "pending",
-      });
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          customer_name: form.name,
+          customer_email: form.email,
+          items: orderItems,
+          total: totalPrice,
+          shipping_address: `${form.address}, ${form.city}, ${form.state}`,
+          status: "pending",
+        })
+        .select("id")
+        .single();
 
-      if (error) throw error;
+      if (orderError) throw orderError;
 
-      clearCart();
-      setPlaced(true);
+      // 2. Initialize Paystack transaction
+      const callbackUrl = `${window.location.origin}/checkout`;
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/paystack?action=initialize`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            email: form.email,
+            amount: totalPrice,
+            callback_url: callbackUrl,
+            metadata: {
+              order_id: order.id,
+              customer_name: form.name,
+              custom_fields: [
+                { display_name: "Customer Name", variable_name: "customer_name", value: form.name },
+                { display_name: "Phone", variable_name: "phone", value: form.phone },
+              ],
+            },
+          }),
+        }
+      );
+
+      const result = await res.json();
+
+      if (result.status && result.data?.authorization_url) {
+        // 3. Redirect to Paystack payment page
+        window.location.href = result.data.authorization_url;
+      } else {
+        throw new Error(result.error || result.message || "Failed to initialize payment");
+      }
     } catch (err: any) {
-      toast.error(err.message || "Failed to place order");
+      toast.error(err.message || "Failed to initiate payment");
     } finally {
       setPlacing(false);
     }
   };
 
+  if (verifying) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-foreground mb-2">Verifying Payment...</h1>
+          <p className="text-muted-foreground text-sm">Please wait while we confirm your payment.</p>
+        </div>
+      </Layout>
+    );
+  }
+
   if (placed) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center">
-          <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-foreground mb-2">Order Placed!</h1>
+          <CheckCircle className="h-16 w-16 text-[hsl(var(--success))] mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground mb-2">Payment Successful!</h1>
           <p className="text-muted-foreground text-sm mb-6">Thank you for your purchase. We'll send a confirmation to your email.</p>
           <Button onClick={() => navigate("/")} className="rounded-full">Continue Shopping</Button>
         </div>
@@ -95,7 +198,7 @@ const Checkout = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handlePayWithPaystack}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-5">
               <div className="bg-card border border-border rounded-lg p-5 space-y-4">
@@ -150,16 +253,30 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>Delivery</span>
-                    <span className="text-success font-medium">Free</span>
+                    <span className="text-[hsl(var(--success))] font-medium">Free</span>
                   </div>
                   <div className="flex justify-between font-bold text-foreground pt-2 border-t border-border">
                     <span>Total</span>
                     <span>₦{totalPrice.toLocaleString()}</span>
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-full h-11 font-semibold" disabled={placing || !user}>
-                  {placing ? "Placing Order..." : "Place Order"}
+
+                <Button
+                  type="submit"
+                  className="w-full rounded-full h-11 font-semibold"
+                  disabled={placing || !user}
+                >
+                  {placing ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing...</>
+                  ) : (
+                    <><CreditCard className="h-4 w-4 mr-2" /> Pay with Paystack</>
+                  )}
                 </Button>
+
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Secured by Paystack · 256-bit SSL encryption
+                </div>
               </div>
             </div>
           </div>
