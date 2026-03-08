@@ -51,6 +51,7 @@ const Index = () => {
   const products = [...(dbProducts || []), ...staticProducts];
 
   const filtered = products.filter((p) => {
+    if (searchQuery && !p.name.toLowerCase().includes(searchQuery) && !p.description?.toLowerCase().includes(searchQuery) && !p.category.toLowerCase().includes(searchQuery)) return false;
     if (selectedCategory !== "All" && p.category !== selectedCategory) return false;
     if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
     if (selectedBrands.length > 0 && !selectedBrands.some((b) => p.vendor_name.toLowerCase().includes(b.toLowerCase()))) return false;
