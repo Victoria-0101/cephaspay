@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
@@ -12,6 +13,8 @@ import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q")?.toLowerCase() || "";
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 1500000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -48,6 +51,7 @@ const Index = () => {
   const products = [...(dbProducts || []), ...staticProducts];
 
   const filtered = products.filter((p) => {
+    if (searchQuery && !p.name.toLowerCase().includes(searchQuery) && !p.description?.toLowerCase().includes(searchQuery) && !p.category.toLowerCase().includes(searchQuery)) return false;
     if (selectedCategory !== "All" && p.category !== selectedCategory) return false;
     if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
     if (selectedBrands.length > 0 && !selectedBrands.some((b) => p.vendor_name.toLowerCase().includes(b.toLowerCase()))) return false;
@@ -101,7 +105,7 @@ const Index = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-primary" />
                 <h2 className="text-lg font-bold text-foreground">
-                  {selectedCategory === "All" ? "All Products" : selectedCategory}
+                  {searchQuery ? `Results for "${searchParams.get("q")}"` : selectedCategory === "All" ? "All Products" : selectedCategory}
                 </h2>
                 <span className="text-xs text-muted-foreground">({filtered.length} results)</span>
               </div>

@@ -1,7 +1,7 @@
 import { Search, ShoppingCart, User, MapPin, ChevronDown, Menu, X, Clock } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
@@ -43,8 +43,24 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { totalItems } = useCart();
   const { user, isAdmin, signOut } = useAuth();
+
+  // Sync search query from URL on mount
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
+
+  const handleSearch = () => {
+    setSearchFocused(false);
+    if (searchQuery.trim()) {
+      navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate("/");
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -116,9 +132,10 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
-              <Button size="icon" className="h-10 w-11 rounded-l-none shrink-0">
+              <Button size="icon" className="h-10 w-11 rounded-l-none shrink-0" onClick={handleSearch}>
                 <Search className="h-4 w-4" />
               </Button>
             </div>
@@ -133,7 +150,7 @@ const Header = () => {
                   <button
                     key={term}
                     className="w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent luxury-transition"
-                    onClick={() => { setSearchQuery(term); setSearchFocused(false); }}
+                    onClick={() => { setSearchQuery(term); setSearchFocused(false); navigate(`/?q=${encodeURIComponent(term)}`); }}
                   >
                     {term}
                   </button>
