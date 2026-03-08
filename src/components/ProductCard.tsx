@@ -1,5 +1,5 @@
 import { Product } from "@/types/product";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { useCart } from "@/hooks/useCart";
 interface ProductCardProps {
   product: Product;
   index: number;
+  onQuickView?: (product: Product) => void;
 }
 
 const HighlightText = ({ text, query }: { text: string; query: string }) => {
@@ -34,7 +35,7 @@ const badgeConfig = {
   "deal": { label: "Deal", className: "bg-destructive text-destructive-foreground" },
 };
 
-const ProductCard = ({ product, index }: ProductCardProps) => {
+const ProductCard = ({ product, index, onQuickView }: ProductCardProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
@@ -52,6 +53,11 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
       stock_count: product.stock_count,
     });
     toast.success(`${product.name.slice(0, 30)}... added to cart`);
+  };
+
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onQuickView?.(product);
   };
 
   return (
@@ -78,6 +84,19 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
             -{product.discount_percentage}%
           </Badge>
         )}
+
+        {/* Quick View overlay */}
+        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 luxury-transition flex items-center justify-center">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 luxury-transition text-xs h-8 rounded-full shadow-lg"
+            onClick={handleQuickView}
+          >
+            <Eye className="h-3.5 w-3.5 mr-1" />
+            Quick View
+          </Button>
+        </div>
       </div>
 
       {/* Info */}
@@ -112,9 +131,17 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
           )}
         </div>
 
-        {/* Stock */}
-        {product.stock_count < 20 && (
-          <p className="text-[10px] text-destructive font-medium">Only {product.stock_count} left in stock</p>
+        {/* Stock badge */}
+        {product.stock_count > 20 ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[hsl(var(--success))]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" /> In Stock
+          </span>
+        ) : product.stock_count > 0 ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[hsl(var(--warning))]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--warning))]" /> Only {product.stock_count} left
+          </span>
+        ) : (
+          <span className="text-[10px] font-medium text-destructive">Out of Stock</span>
         )}
 
         {/* Add to cart */}
